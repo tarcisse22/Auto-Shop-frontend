@@ -3,10 +3,15 @@
 }
 
 :root {
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  color: #11332e;
-  background: #eef6f4;
-  line-height: 1.45;
+  font-family: "Inter", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: #182127;
+  background: #f4f6f8;
+  line-height: 1.5;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 76px;
 }
 
 body {

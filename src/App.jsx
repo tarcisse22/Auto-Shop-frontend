@@ -1,5 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
-import { Wrench, Car, Zap, ShieldCheck, Phone, LogIn, LogOut, Pencil, Trash2, X } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  Wrench, Car, Zap, ShieldCheck, Phone, LogIn, LogOut,
+  Pencil, Trash2, X, Menu, Search, ArrowUp, Clock, MapPin, Mail,
+} from "lucide-react";
 import {
   addDoc,
   collection,
@@ -23,6 +26,7 @@ const BUSINESS = {
   address: "6201 Memorial Dr, Stone Mountain, GA 30083",
   mapsLink:
     "https://www.google.com/maps/dir/?api=1&destination=6201+Memorial+Dr,+Stone+Mountain,+GA+30083",
+  hours: "Mon–Sun: Open 24/7",
 };
 
 const SERVICES = [
@@ -64,6 +68,21 @@ function CarLineSVG() {
       <line x1="175" y1="54" x2="188" y2="54" stroke="#f97316" strokeWidth="1.5" strokeLinecap="round"/>
       <line x1="118" y1="54" x2="131" y2="54" stroke="#f97316" strokeWidth="1.5" strokeLinecap="round"/>
     </svg>
+  );
+}
+
+function SkeletonCard() {
+  return (
+    <article className="card inventory-card skeleton-card">
+      <div className="car-svg-wrap skeleton-banner" />
+      <div className="inventory-card-body">
+        <div className="skeleton-line skeleton-title" />
+        <div className="skeleton-line skeleton-subtitle" />
+        <div className="skeleton-line" />
+        <div className="skeleton-line" />
+        <div className="skeleton-line skeleton-short" />
+      </div>
+    </article>
   );
 }
 
@@ -111,6 +130,9 @@ export default function App() {
   const [saveBusy, setSaveBusy] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
   const [seedAttempted, setSeedAttempted] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showBackToTop, setShowBackToTop] = useState(false);
 
   const isOwner = useMemo(() => {
     const email = user?.email?.toLowerCase();
@@ -159,6 +181,14 @@ export default function App() {
     };
     autoSeedCars();
   }, [cars.length, carsLoading, isOwner, seedAttempted]);
+
+  useEffect(() => {
+    const handleScroll = () => setShowBackToTop(window.scrollY > 400);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const closeMenu = useCallback(() => setMobileMenuOpen(false), []);
 
   const handleLogin = async (event) => {
     event.preventDefault();
@@ -264,20 +294,41 @@ export default function App() {
 
   const carsToDisplay = cars.length > 0 ? cars : SAMPLE_CARS;
 
+  const filteredCars = useMemo(() => {
+    if (!searchQuery.trim()) return carsToDisplay;
+    const q = searchQuery.toLowerCase();
+    return carsToDisplay.filter(
+      (car) =>
+        (car.title || "").toLowerCase().includes(q) ||
+        (car.mileage || "").toLowerCase().includes(q) ||
+        (car.items || []).some((item) => item.toLowerCase().includes(q)),
+    );
+  }, [carsToDisplay, searchQuery]);
+
   return (
     <div className="site">
       <header className="nav-shell">
         <nav className="nav container">
-          <div className="brand">{BUSINESS.name}</div>
-          <div className="nav-links">
-            <a href="#home">Home</a>
-            <a href="#inventory">Inventory</a>
-            <a href="#services">Services</a>
-            <a href="#book">Book</a>
+          <a href="#home" className="brand" onClick={closeMenu}>{BUSINESS.name}</a>
+
+          <button
+            className="mobile-menu-btn icon-btn"
+            onClick={() => setMobileMenuOpen((v) => !v)}
+            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+          >
+            {mobileMenuOpen ? <X size={22} color="#fff" /> : <Menu size={22} color="#fff" />}
+          </button>
+
+          <div className={`nav-links${mobileMenuOpen ? " nav-links--open" : ""}`}>
+            <a href="#home" onClick={closeMenu}>Home</a>
+            <a href="#inventory" onClick={closeMenu}>Inventory</a>
+            <a href="#services" onClick={closeMenu}>Services</a>
+            <a href="#book" onClick={closeMenu}>Book</a>
           </div>
+
           <div className="auth-area">
             {!authLoading && !user ? (
-              <button className="ghost-btn" onClick={() => setShowLogin((v) => !v)}>
+              <button className="ghost-btn" onClick={() => { setShowLogin((v) => !v); closeMenu(); }}>
                 <LogIn size={16} /> Owner Login
               </button>
             ) : null}
@@ -293,8 +344,10 @@ export default function App() {
         </nav>
       </header>
 
+      {mobileMenuOpen ? <div className="nav-backdrop" onClick={closeMenu} /> : null}
+
       {showLogin && !user ? (
-        <section className="container login-panel">
+        <section className="container login-panel animate-fade-in">
           <form onSubmit={handleLogin} className="card">
             <div className="card-header">
               <h2>Owner Login</h2>
@@ -328,40 +381,96 @@ export default function App() {
         />
         <div className="hero-overlay" />
         <div className="hero-content container">
+          <p className="hero-badge">Trusted Auto Service Since Day One</p>
           <h1>Ciza Auto Service Center</h1>
-          <p>Mechanical, body repair, installations, and mobile service support.</p>
+          <p className="hero-subtitle">Mechanical, body repair, installations, and mobile service support.</p>
           <div className="hero-actions">
-            <a className="primary-btn" href={BUSINESS.phoneLink}>Call Now</a>
-            <a className="secondary-btn" href={`mailto:${BUSINESS.email}`}>Get a Quote</a>
-            <a className="secondary-btn" href="#book">Book Appointment</a>
+            <a className="primary-btn" href={BUSINESS.phoneLink}><Phone size={16} /> Call Now</a>
+            <a className="secondary-btn hero-secondary" href={`mailto:${BUSINESS.email}`}>Get a Quote</a>
+            <a className="secondary-btn hero-secondary" href="#book">Book Appointment</a>
           </div>
           <div className="hero-meta">
-            <span>Available 24/7</span>
-            <span>24/7 Towing Available</span>
-            <span><Phone size={16} /> {BUSINESS.phone}</span>
+            <span><Clock size={14} /> Open 24/7</span>
+            <span><ShieldCheck size={14} /> 24/7 Towing</span>
+            <span><Phone size={14} /> {BUSINESS.phone}</span>
           </div>
         </div>
       </section>
 
-      <section id="inventory" className="section container">
+      <section className="stats-bar">
+        <div className="container stats-inner">
+          <div className="stat">
+            <span className="stat-number">{carsToDisplay.length}+</span>
+            <span className="stat-label">Vehicles in Stock</span>
+          </div>
+          <div className="stat">
+            <span className="stat-number">4</span>
+            <span className="stat-label">Service Categories</span>
+          </div>
+          <div className="stat">
+            <span className="stat-number">24/7</span>
+            <span className="stat-label">Availability</span>
+          </div>
+          <div className="stat">
+            <span className="stat-number">100%</span>
+            <span className="stat-label">Satisfaction</span>
+          </div>
+        </div>
+      </section>
+
+      <section id="inventory" className="section container animate-section">
         <div className="section-title-row">
-          <h2>Auto Parts Inventory</h2>
+          <div>
+            <h2>Auto Parts Inventory</h2>
+            <p className="muted">Call to confirm availability and compatibility.</p>
+          </div>
           {!authLoading && user && !isOwner ? (
             <p className="viewer-note">Signed in as viewer only. Owner permissions required to edit.</p>
           ) : null}
         </div>
-        <p className="muted">Call to confirm availability and compatibility.</p>
+
+        <div className="search-bar">
+          <Search size={18} className="search-icon" />
+          <input
+            type="text"
+            placeholder="Search by car, part, or keyword..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="search-input"
+          />
+          {searchQuery ? (
+            <button className="search-clear icon-btn" onClick={() => setSearchQuery("")}>
+              <X size={16} />
+            </button>
+          ) : null}
+        </div>
+
         {carsError ? <p className="error-text">{carsError}</p> : null}
-        {carsLoading ? <p className="muted">Loading inventory...</p> : null}
+
+        {carsLoading ? (
+          <div className="inventory-grid">
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+          </div>
+        ) : null}
+
         {!carsLoading && cars.length === 0 ? (
           <div className="empty">
             <p>Showing starter inventory below. Owner can still login to add real cars anytime.</p>
           </div>
         ) : null}
+
+        {!carsLoading && filteredCars.length === 0 && searchQuery ? (
+          <div className="empty">
+            <p>No vehicles or parts match &ldquo;{searchQuery}&rdquo;. Try a different search.</p>
+          </div>
+        ) : null}
+
         {!carsLoading ? (
           <div className="inventory-grid">
-            {carsToDisplay.map((car, index) => (
-              <article key={car.id || `sample-${index}`} className="card inventory-card">
+            {filteredCars.map((car, index) => (
+              <article key={car.id || `sample-${index}`} className="card inventory-card animate-card">
                 <div className="car-svg-wrap">
                   <CarLineSVG />
                 </div>
@@ -374,8 +483,8 @@ export default function App() {
                     ))}
                   </ul>
                   <div className="inventory-actions">
-                    <a href={BUSINESS.phoneLink} className="primary-btn small-btn">Call</a>
-                    <a href={`mailto:${BUSINESS.email}`} className="secondary-btn small-btn">Email</a>
+                    <a href={BUSINESS.phoneLink} className="primary-btn small-btn"><Phone size={14} /> Call</a>
+                    <a href={`mailto:${BUSINESS.email}`} className="secondary-btn small-btn"><Mail size={14} /> Email</a>
                   </div>
                   {isOwner && cars.length > 0 ? (
                     <div className="owner-actions">
@@ -388,17 +497,24 @@ export default function App() {
             ))}
           </div>
         ) : null}
+
+        {!carsLoading && filteredCars.length > 0 && searchQuery ? (
+          <p className="muted search-results-count">{filteredCars.length} result{filteredCars.length !== 1 ? "s" : ""} found</p>
+        ) : null}
       </section>
 
-      <section id="services" className="section section-alt">
+      <section id="services" className="section section-alt animate-section">
         <div className="container">
           <h2>Our Services</h2>
+          <p className="muted">Professional auto care for every need.</p>
           <div className="services-grid">
             {SERVICES.map((service) => {
               const Icon = service.icon;
               return (
-                <article key={service.title} className="card service-card">
-                  <Icon size={26} />
+                <article key={service.title} className="card service-card animate-card">
+                  <div className="service-icon-wrap">
+                    <Icon size={28} />
+                  </div>
                   <h3>{service.title}</h3>
                   <p>{service.desc}</p>
                 </article>
@@ -408,14 +524,17 @@ export default function App() {
         </div>
       </section>
 
-      <section id="book" className="section container center">
+      <section id="book" className="section container center animate-section">
         <h2>Book an Appointment</h2>
-        <p className="muted">Available 24/7. Fast booking by phone.</p>
-        <a className="primary-btn" href={BUSINESS.phoneLink}>Call to Book Now</a>
+        <p className="muted">Available 24/7. Fast booking by phone or email.</p>
+        <div className="book-actions">
+          <a className="primary-btn" href={BUSINESS.phoneLink}><Phone size={16} /> Call to Book Now</a>
+          <a className="secondary-btn" href={`mailto:${BUSINESS.email}?subject=Appointment Request`}><Mail size={16} /> Email Us</a>
+        </div>
       </section>
 
       {isOwner ? (
-        <section className="section admin-section">
+        <section className="section admin-section animate-section">
           <div className="container">
             <div className="card admin-card">
               <h2>{editingId ? "Update Car" : "Add Car"}</h2>
@@ -455,19 +574,41 @@ export default function App() {
         </section>
       ) : null}
 
-      <footer className="location-footer">
-        <div className="container location-inner">
-          <div>
-            <h3>Visit Us</h3>
-            <p>{BUSINESS.address}</p>
+      <footer className="site-footer">
+        <div className="container footer-grid">
+          <div className="footer-col">
+            <h3>{BUSINESS.name}</h3>
+            <p className="footer-desc">Your trusted auto service center in Stone Mountain, GA. Quality repairs, fair prices, and 24/7 availability.</p>
           </div>
-          <a className="primary-btn" href={BUSINESS.mapsLink} target="_blank" rel="noreferrer">Get Here</a>
+          <div className="footer-col">
+            <h4>Quick Links</h4>
+            <a href="#home">Home</a>
+            <a href="#inventory">Inventory</a>
+            <a href="#services">Services</a>
+            <a href="#book">Book Appointment</a>
+          </div>
+          <div className="footer-col">
+            <h4>Contact</h4>
+            <a href={BUSINESS.phoneLink}><Phone size={14} /> {BUSINESS.phone}</a>
+            <a href={`mailto:${BUSINESS.email}`}><Mail size={14} /> {BUSINESS.email}</a>
+            <a href={BUSINESS.mapsLink} target="_blank" rel="noreferrer"><MapPin size={14} /> {BUSINESS.address}</a>
+            <span><Clock size={14} /> {BUSINESS.hours}</span>
+          </div>
+        </div>
+        <div className="footer-bottom container">
+          <p>&copy; {new Date().getFullYear()} {BUSINESS.name}. All rights reserved.</p>
         </div>
       </footer>
+
+      {showBackToTop ? (
+        <button
+          className="back-to-top"
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          aria-label="Back to top"
+        >
+          <ArrowUp size={20} />
+        </button>
+      ) : null}
     </div>
   );
 }
-
-
-
-
