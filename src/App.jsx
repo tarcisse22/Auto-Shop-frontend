@@ -16,7 +16,7 @@ import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebas
 import { auth, db } from "./firebase";
 import "./App.css";
 
-const OWNER_EMAILS = ["odinramadan@gmail.com"];
+const OWNER_EMAILS = ["cizaautostore@gmail.com"];
 
 const BUSINESS = {
   name: "Ciza Auto Service",
@@ -101,7 +101,7 @@ function sortCars(cars) {
 
 function toFriendlyError(error) {
   const code = error?.code || "";
-  if (code === "permission-denied") return "Permission denied in Firestore rules. Add odinramadan@gmail.com to write rules.";
+  if (code === "permission-denied") return "Permission denied in Firestore rules. Add cizaautostore@gmail.com to write rules.";
   if (code === "unauthenticated") return "You must be logged in as owner to add or edit cars.";
   return error?.message || "Request failed. Please try again.";
 }
