@@ -1,85 +1,82 @@
-# Auto Shop Inventory Manager
+# APEX MOTORS — Luxury Performance Automotive
 
-A full-stack web application for managing auto service shop inventory. Built with React and Firebase, it enables shop staff to track vehicles, manage service records, and handle inventory in real time.
+A modern, cinematic luxury automotive website showcasing the world's most exclusive high-performance vehicles. Built with a premium dark UI, glassmorphism effects, and immersive animations.
 
 ## Features
 
-- **Authentication** — Secure login and registration via Firebase Auth with role-based access control
-- **Vehicle Management** — Add, edit, view, and delete vehicle records with full CRUD functionality
-- **Real-Time Updates** — Live data sync powered by Firestore; changes reflect instantly across sessions
-- **Responsive Design** — Clean, mobile-friendly UI that works across desktop and mobile devices
+- **Cinematic Homepage** — Full-screen hero with ambient lighting effects and category sections
+- **Global Search** — Instant search with thumbnails, filters by category, sort by HP/speed/year/price
+- **Dynamic Car Detail Pages** — Hero images, full specifications, gallery, performance metrics, similar cars
+- **Car Comparison** — Side-by-side comparison of up to 3 vehicles with highlighted best values
+- **Favorites System** — Save cars with localStorage persistence
+- **30+ Elite Vehicles** — Porsche, BMW M, Mercedes AMG, Audi RS, Lamborghini, Ferrari, McLaren, Nissan GT-R, Toyota Supra, Koenigsegg, Bugatti, Pagani, Honda NSX, and more
+- **Category Sections** — Hypercars, German Performance, JDM Legends, Supercars, Exotic Classics
+- **Responsive Design** — Mobile-first, works across all devices
+- **Dark Mode Only** — Aggressive black/dark gray UI with glassmorphism
+- **Smooth Animations** — Framer Motion transitions throughout
 
 ## Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
-| Frontend | React, Vite |
-| Backend / Database | Firebase Firestore |
-| Authentication | Firebase Auth |
-| Styling | CSS3 |
-| Package Manager | npm |
+| Framework | Next.js 14 (App Router) |
+| UI Library | React 18 |
+| Styling | Tailwind CSS 3 |
+| Animations | Framer Motion |
+| Icons | Lucide React |
+| Language | TypeScript |
 
 ## Getting Started
 
-### Prerequisites
-
-- Node.js v18+
-- npm v9+
-- A Firebase project with Firestore and Authentication enabled
-
-### Installation
-
 ```bash
-# Clone the repository
-git clone https://github.com/tarcisse22/Auto-Shop-frontend.git
-cd Auto-Shop-frontend
-
 # Install dependencies
 npm install
-```
 
-### Firebase Setup
-
-1. Go to [Firebase Console](https://console.firebase.google.com/) and create a project
-2. Enable **Firestore Database** and **Authentication** (Email/Password)
-3. Copy your Firebase config and create a `.env` file in the root:
-
-```env
-VITE_FIREBASE_API_KEY=your_api_key
-VITE_FIREBASE_AUTH_DOMAIN=your_auth_domain
-VITE_FIREBASE_PROJECT_ID=your_project_id
-VITE_FIREBASE_STORAGE_BUCKET=your_storage_bucket
-VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-VITE_FIREBASE_APP_ID=your_app_id
-```
-
-### Running Locally
-
-```bash
+# Run development server
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173) in your browser.
-
-### Building for Production
-
-```bash
-npm run build
-```
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Project Structure
 
 ```
-Auto-Shop-frontend/
-├── src/
-│   ├── components/       # Reusable UI components
-│   ├── pages/            # Route-level page components
-│   ├── firebase.js       # Firebase initialization and config
-│   └── main.jsx          # App entry point
-├── index.html
-├── vite.config.js
-└── package.json
+src/
+├── app/
+│   ├── layout.tsx          # Root layout with metadata
+│   ├── page.tsx            # Homepage
+│   ├── globals.css         # Global styles + Tailwind
+│   ├── cars/[id]/page.tsx  # Car detail pages
+│   ├── search/page.tsx     # Search & filter page
+│   ├── compare/page.tsx    # Car comparison
+│   └── favorites/page.tsx  # Saved favorites
+├── components/
+│   ├── Navbar.tsx           # Responsive nav with search
+│   ├── HeroSection.tsx      # Cinematic hero banner
+│   ├── CarCard.tsx          # Interactive car cards
+│   ├── CategorySection.tsx  # Category grid layout
+│   ├── CompareBar.tsx       # Floating compare bar
+│   ├── FeaturedStats.tsx    # Stats counter section
+│   └── Footer.tsx           # Site footer
+├── data/
+│   └── cars.ts              # Car database + helpers
+├── hooks/
+│   ├── useFavorites.ts      # Favorites state (localStorage)
+│   ├── useCompare.ts        # Compare list state
+│   └── useSearch.ts         # Search logic
+├── types/
+│   └── car.ts               # TypeScript interfaces
+└── lib/
+    └── utils.ts             # Utility functions
 ```
+
+## Design Direction
+
+- Black/dark gray UI with glassmorphism
+- Aggressive Orbitron typography for headings
+- Smooth scroll and Framer Motion animations
+- Ambient lighting effects and glow accents
+- Performance-focused aesthetic with red/gold/blue accents
 
 ## Author
 
