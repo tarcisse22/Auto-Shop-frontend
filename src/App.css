@@ -71,10 +71,6 @@
 
 .nav-links a:focus-visible { color: #f59e0b; outline: none; }
 
-.mobile-menu-btn {
-  display: none;
-  background: transparent;
-}
 
 .auth-area {
   display: flex;
@@ -517,6 +513,9 @@ button { font: inherit; cursor: pointer; border: none; }
   padding: 0.3rem;
   background: transparent;
 }
+
+/* Must come after .icon-btn, which would otherwise show it on desktop */
+.mobile-menu-btn { display: none; }
 
 .small-btn { flex: 1; }
 
