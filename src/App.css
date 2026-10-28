@@ -595,6 +595,24 @@ button { font: inherit; cursor: pointer; border: none; }
   font-size: 0.85rem;
 }
 
+.footer-login-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.6rem;
+  padding: 0.25rem 0.5rem;
+  background: none;
+  border: none;
+  color: #6b7280;
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.footer-login-btn:hover {
+  color: #9ca3af;
+}
+
 /* ── Back to Top ── */
 .back-to-top {
   position: fixed;

@@ -36,14 +36,6 @@ const SERVICES = [
   { title: "Mobile Mechanic", desc: "On-site diagnostics and support when you are stuck.", icon: ShieldCheck },
 ];
 
-const SAMPLE_CARS = [
-  { title: "2016 Nissan Rogue (FWD)", mileage: "140,000 miles", items: ["Transmission (2 available) - $800 each", "Starter - $95", "Alternator - $145"] },
-  { title: "2013 Ford Taurus (V6)", mileage: "140,000 miles", items: ["Engine - $1,000", "Transmission - $750", "Alternator - $140", "Starter - $90"] },
-  { title: "2015 Acura TLX (Package Deal)", mileage: "110,000 miles", items: ["Engine + Transmission + Alternator + Computer + Starter - $2,200"] },
-  { title: "2018 Toyota Camry (SE)", mileage: "98,000 miles", items: ["Engine - $1,350", "Transmission - $950", "Front bumper - $220", "Radiator - $120"] },
-  { title: "2014 Honda Accord (EX)", mileage: "125,000 miles", items: ["Engine - $1,100", "Transmission - $800", "AC compressor - $130", "Starter - $85"] },
-];
-
 const EMPTY_FORM = { title: "", mileage: "", partsText: "" };
 
 function CarLineSVG() {
@@ -129,7 +121,6 @@ export default function App() {
   const [editingId, setEditingId] = useState("");
   const [saveBusy, setSaveBusy] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
-  const [seedAttempted, setSeedAttempted] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showBackToTop, setShowBackToTop] = useState(false);
@@ -163,24 +154,6 @@ export default function App() {
   }, []);
 
   useEffect(() => { loadCars(); }, []);
-
-  useEffect(() => {
-    const autoSeedCars = async () => {
-      if (seedAttempted || carsLoading || !isOwner || cars.length > 0) return;
-      setSeedAttempted(true);
-      setCarsError("");
-      try {
-        await withTimeout(
-          Promise.all(SAMPLE_CARS.map((car) => addDoc(collection(db, "cars"), { ...car, createdAt: serverTimestamp(), updatedAt: serverTimestamp() }))),
-          12000, "Seeding starter cars",
-        );
-        await loadCars();
-      } catch (error) {
-        setCarsError(toFriendlyError(error));
-      }
-    };
-    autoSeedCars();
-  }, [cars.length, carsLoading, isOwner, seedAttempted]);
 
   useEffect(() => {
     const handleScroll = () => setShowBackToTop(window.scrollY > 400);
@@ -292,18 +265,16 @@ export default function App() {
     }
   };
 
-  const carsToDisplay = cars.length > 0 ? cars : SAMPLE_CARS;
-
   const filteredCars = useMemo(() => {
-    if (!searchQuery.trim()) return carsToDisplay;
+    if (!searchQuery.trim()) return cars;
     const q = searchQuery.toLowerCase();
-    return carsToDisplay.filter(
+    return cars.filter(
       (car) =>
         (car.title || "").toLowerCase().includes(q) ||
         (car.mileage || "").toLowerCase().includes(q) ||
         (car.items || []).some((item) => item.toLowerCase().includes(q)),
     );
-  }, [carsToDisplay, searchQuery]);
+  }, [cars, searchQuery]);
 
   return (
     <div className="site">
@@ -327,11 +298,6 @@ export default function App() {
           </div>
 
           <div className="auth-area">
-            {!authLoading && !user ? (
-              <button className="ghost-btn" onClick={() => { setShowLogin((v) => !v); closeMenu(); }}>
-                <LogIn size={16} /> Owner Login
-              </button>
-            ) : null}
             {user ? (
               <>
                 <span className="auth-user">{user.email}</span>
@@ -399,10 +365,12 @@ export default function App() {
 
       <section className="stats-bar">
         <div className="container stats-inner">
-          <div className="stat">
-            <span className="stat-number">{carsToDisplay.length}+</span>
-            <span className="stat-label">Vehicles in Stock</span>
-          </div>
+          {cars.length > 0 ? (
+            <div className="stat">
+              <span className="stat-number">{cars.length}</span>
+              <span className="stat-label">Vehicles in Stock</span>
+            </div>
+          ) : null}
           <div className="stat">
             <span className="stat-number">4</span>
             <span className="stat-label">Service Categories</span>
@@ -445,7 +413,12 @@ export default function App() {
           ) : null}
         </div>
 
-        {carsError ? <p className="error-text">{carsError}</p> : null}
+        {carsError && isOwner ? <p className="error-text">{carsError}</p> : null}
+        {carsError && !isOwner ? (
+          <div className="empty">
+            <p>Inventory couldn&rsquo;t load right now. Call <a href={BUSINESS.phoneLink}>{BUSINESS.phone}</a> for current parts and availability.</p>
+          </div>
+        ) : null}
 
         {carsLoading ? (
           <div className="inventory-grid">
@@ -455,9 +428,13 @@ export default function App() {
           </div>
         ) : null}
 
-        {!carsLoading && cars.length === 0 ? (
+        {!carsLoading && !carsError && cars.length === 0 ? (
           <div className="empty">
-            <p>Showing starter inventory below. Owner can still login to add real cars anytime.</p>
+            <p>
+              {isOwner
+                ? "No cars in inventory yet. Use the Add Car form below to add one."
+                : <>Inventory is being updated. Call <a href={BUSINESS.phoneLink}>{BUSINESS.phone}</a> for current parts and availability.</>}
+            </p>
           </div>
         ) : null}
 
@@ -469,8 +446,8 @@ export default function App() {
 
         {!carsLoading ? (
           <div className="inventory-grid">
-            {filteredCars.map((car, index) => (
-              <article key={car.id || `sample-${index}`} className="card inventory-card animate-card">
+            {filteredCars.map((car) => (
+              <article key={car.id} className="card inventory-card animate-card">
                 <div className="car-svg-wrap">
                   <CarLineSVG />
                 </div>
@@ -479,14 +456,14 @@ export default function App() {
                   <p className="muted">Mileage: {car.mileage}</p>
                   <ul>
                     {(car.items || []).map((item, idx) => (
-                      <li key={`${car.id || `sample-${index}`}-${idx}`}>{item}</li>
+                      <li key={`${car.id}-${idx}`}>{item}</li>
                     ))}
                   </ul>
                   <div className="inventory-actions">
                     <a href={BUSINESS.phoneLink} className="primary-btn small-btn"><Phone size={14} /> Call</a>
                     <a href={`mailto:${BUSINESS.email}`} className="secondary-btn small-btn"><Mail size={14} /> Email</a>
                   </div>
-                  {isOwner && cars.length > 0 ? (
+                  {isOwner ? (
                     <div className="owner-actions">
                       <button className="ghost-btn" onClick={() => handleEdit(car)}><Pencil size={15} /> Edit</button>
                       <button className="danger-btn" onClick={() => handleDelete(car.id)}><Trash2 size={15} /> Delete</button>
@@ -597,6 +574,14 @@ export default function App() {
         </div>
         <div className="footer-bottom container">
           <p>&copy; {new Date().getFullYear()} {BUSINESS.name}. All rights reserved.</p>
+          {!authLoading && !user ? (
+            <button
+              className="footer-login-btn"
+              onClick={() => { setShowLogin(true); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+            >
+              <LogIn size={14} /> Owner Login
+            </button>
+          ) : null}
         </div>
       </footer>
 
