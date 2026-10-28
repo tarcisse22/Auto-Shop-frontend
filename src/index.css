@@ -5,13 +5,13 @@
 :root {
   font-family: "Inter", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   color: #182127;
-  background: #f4f6f8;
+  background: #ffffff;
   line-height: 1.5;
 }
 
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 76px;
+  scroll-padding-top: 84px;
 }
 
 body {
