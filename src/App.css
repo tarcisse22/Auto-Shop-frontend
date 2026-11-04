@@ -536,6 +536,32 @@ h1, h2, h3 { letter-spacing: -0.02em; color: var(--navy); }
   100% { background-position: -200% 0; }
 }
 
+/* ── Shop Gallery ── */
+.shop-gallery {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+
+.shop-photo {
+  margin: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  aspect-ratio: 4 / 5;
+  background: var(--line);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.1);
+}
+
+.shop-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s ease;
+}
+
+.shop-photo:hover img { transform: scale(1.04); }
+
 /* ── Book CTA ── */
 .cta-band {
   background: var(--orange);
@@ -890,6 +916,7 @@ button { font: inherit; cursor: pointer; border: none; }
   .back-to-top { animation: none; }
   .inventory-card:hover,
   .service-card:hover { transform: none; }
+  .shop-photo:hover img { transform: none; }
 }
 
 /* ── Responsive: Tablet ── */
@@ -942,6 +969,9 @@ button { font: inherit; cursor: pointer; border: none; }
 
   .contact-grid { grid-template-columns: 1fr; }
 
+  .shop-gallery { grid-template-columns: 1fr 1fr; }
+  .shop-photo:last-child { grid-column: 1 / -1; aspect-ratio: 16 / 9; }
+
   .footer-grid { grid-template-columns: 1fr 1fr; }
 }
 
@@ -974,6 +1004,10 @@ button { font: inherit; cursor: pointer; border: none; }
   .services-grid { grid-template-columns: 1fr; }
 
   .search-bar { width: 100%; }
+
+  .shop-gallery { grid-template-columns: 1fr; }
+  .shop-photo,
+  .shop-photo:last-child { aspect-ratio: 4 / 3; }
 
   .book-actions { width: 100%; }
   .book-actions .btn-lg { flex: 1; }
