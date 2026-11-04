@@ -15,6 +15,9 @@ import {
 } from "firebase/firestore";
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { auth, db } from "./firebase";
+import shopLot from "./assets/shop-lot.webp";
+import shopRepair from "./assets/shop-repair.webp";
+import shopFront from "./assets/shop-front.webp";
 import "./App.css";
 
 const OWNER_EMAILS = ["cizaautostore@gmail.com"];
@@ -30,8 +33,7 @@ const BUSINESS = {
   hours: "Mon–Sun: Open 24/7",
   mapEmbed:
     "https://maps.google.com/maps?q=6201+Memorial+Dr,+Stone+Mountain,+GA+30083&z=15&output=embed",
-  heroImage:
-    "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?auto=format&fit=crop&w=1600&q=80",
+  heroImage: shopLot,
 };
 
 const SERVICES = [
@@ -39,6 +41,12 @@ const SERVICES = [
   { title: "Body & Collision", desc: "Accident repair, panel work, and restoration support.", icon: Car },
   { title: "Electronics", desc: "Cameras, audio systems, and accessory installation.", icon: Zap },
   { title: "Mobile Mechanic", desc: "On-site diagnostics and support when you are stuck.", icon: ShieldCheck },
+];
+
+const SHOP_PHOTOS = [
+  { src: shopLot, alt: "Mechanics working on cars in the Ciza Auto Service lot" },
+  { src: shopRepair, alt: "Front-end collision repair on a Nissan Sentra" },
+  { src: shopFront, alt: "Ciza Auto Service building at 6201 Memorial Dr" },
 ];
 
 const EMPTY_FORM = { title: "", mileage: "", partsText: "" };
@@ -343,7 +351,7 @@ export default function App() {
       <section id="home" className="hero">
         <img
           src={BUSINESS.heroImage}
-          alt="Mechanic working on a car in the shop"
+          alt="Ciza Auto Service lot in Stone Mountain"
           className="hero-image"
           onError={(e) => { e.currentTarget.style.display = "none"; }}
         />
@@ -421,7 +429,24 @@ export default function App() {
         </div>
       </section>
 
-      <section id="inventory" className="section section-alt">
+      <section id="shop" className="section section-alt">
+        <div className="container">
+          <div className="section-head">
+            <p className="eyebrow">Our Shop</p>
+            <h2>Real Work, Right Here in Stone Mountain</h2>
+            <p className="muted">Come by {BUSINESS.address}. We work on cars every day, around the clock.</p>
+          </div>
+          <div className="shop-gallery">
+            {SHOP_PHOTOS.map((photo) => (
+              <figure key={photo.src} className="shop-photo">
+                <img src={photo.src} alt={photo.alt} loading="lazy" />
+              </figure>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="inventory" className="section">
         <div className="container">
           <div className="section-title-row">
             <div className="section-head section-head--left">
